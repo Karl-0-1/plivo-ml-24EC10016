@@ -36,7 +36,7 @@ def main():
     ap.add_argument("--steps", type=int, default=2000)
     ap.add_argument("--batch", type=int, default=16)
     ap.add_argument("--accum", type=int, default=2)
-    ap.add_argument("--lr", type=float, default=1e-3)
+    ap.add_argument("--lr", type=float, default=2e-3)
     ap.add_argument("--seed", type=int, default=1337)
     ap.add_argument("--out", default="ckpt.pt")
     ap.add_argument("--log_every", type=int, default=100)
@@ -58,7 +58,7 @@ def main():
     print(f"model: {n:,} params")
     assert n <= MAX_PARAMS, f"cap: max {MAX_PARAMS:,} params"
 
-    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.1, betas=(0.9, 0.95))
+    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.2, betas=(0.9, 0.95))
 
     def get_lr(step, max_steps):
         warmup_steps = int(max_steps * 0.1)

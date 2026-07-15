@@ -15,7 +15,7 @@ class Config:
     n_layer = 5
     n_head = 6
     n_embd = 144
-    dropout = 0.0
+    dropout = 0.1
     tie_weights = True
 
 
@@ -39,13 +39,15 @@ class SelfAttention(nn.Module):
 
 
 class Block(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self, cfg, layer_idx):
         super().__init__()
         self.ln1 = nn.LayerNorm(cfg.n_embd)
         self.attn = SelfAttention(cfg)
         self.ln2 = nn.LayerNorm(cfg.n_embd)
+        
+        activation = nn.SELU() if layer_idx < (cfg.n_layer // 2) else nn.ReLU()
         self.mlp = nn.Sequential(
-            nn.Linear(cfg.n_embd, 4 * cfg.n_embd), nn.GELU(),
+            nn.Linear(cfg.n_embd, 4 * cfg.n_embd), activation,
             nn.Linear(4 * cfg.n_embd, cfg.n_embd), nn.Dropout(cfg.dropout))
         self.attn.proj.NANOGPT_SCALE_INIT = 1
         self.mlp[2].NANOGPT_SCALE_INIT = 1
@@ -63,7 +65,7 @@ class GPT(nn.Module):
         self.tok_emb = nn.Embedding(cfg.vocab_size, cfg.n_embd)
         self.pos_emb = nn.Embedding(cfg.block_size, cfg.n_embd)
         self.drop = nn.Dropout(cfg.dropout)
-        self.blocks = nn.ModuleList(Block(cfg) for _ in range(cfg.n_layer))
+        self.blocks = nn.ModuleList(Block(cfg, i) for i in range(cfg.n_layer))
         self.ln_f = nn.LayerNorm(cfg.n_embd)
         self.head = nn.Linear(cfg.n_embd, cfg.vocab_size, bias=False)
         if cfg.tie_weights:
