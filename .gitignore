@@ -1,0 +1,7 @@
+env/
+__pycache__/
+ckpt_baseline.pt
+ckpt_test.pt
+*.ipynb
+*.zip
+*.pdf
